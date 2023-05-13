@@ -1,0 +1,419 @@
+Lab 7: Hashing
+
+1) Hashing with separate chaining
+
+#include <iostream>
+#include <cstring>
+struct node 
+{
+    char* key;
+    char* value;
+    struct node* next;
+};
+void setNode(struct node* node, char* key, char* value) 
+{
+    node->key = key;
+    node->value = value;
+    node->next = NULL;
+    return;
+}
+struct hashMap 
+{
+    int numOfElements, capacity;
+    struct node** arr;
+};
+void initializeHashMap(struct hashMap* mp) 
+{
+    mp->capacity = 100;
+    mp->numOfElements = 0;
+    mp->arr = (struct node**)malloc(sizeof(struct node*) * mp->capacity);
+    return;
+}
+int hashFunction(struct hashMap* mp, char* key) 
+{
+    int bucketIndex;
+    int sum = 0, factor = 31;
+    for (int i = 0; i < strlen(key); i++) 
+    {
+        sum = ((sum % mp->capacity) + (((int)key[i]) * factor) % mp->capacity) % mp->capacity;
+        factor = ((factor % __INT16_MAX__) * (31 % __INT16_MAX__)) % __INT16_MAX__;
+    }
+    bucketIndex = sum;
+    return bucketIndex;
+}
+void insert(struct hashMap* mp, char* key, char* value) 
+{
+    int bucketIndex = hashFunction(mp, key);
+    struct node* newNode = (struct node*)malloc(sizeof(struct node));
+    setNode(newNode, key, value);
+    if (mp->arr[bucketIndex] == NULL) 
+    {
+        mp->arr[bucketIndex] = newNode;
+    }
+    else
+    {
+        newNode->next = mp->arr[bucketIndex];
+        mp->arr[bucketIndex] = newNode;
+    }
+    return;
+}
+void deleteKey(struct hashMap* mp, char* key) 
+{
+    int bucketIndex = hashFunction(mp, key);
+    struct node* prevNode = NULL;
+    struct node* currNode = mp->arr[bucketIndex];
+    while (currNode != NULL) 
+    {
+        if (strcmp(key, currNode->key) == 0) 
+        {
+            if (currNode == mp->arr[bucketIndex]) 
+            {
+                mp->arr[bucketIndex] = currNode->next;
+            }
+            else
+            {
+                prevNode->next = currNode->next;
+            }
+            free(currNode);
+            break;
+        }
+        prevNode = currNode;
+        currNode = currNode->next;
+    }
+    return;
+}
+char* search(struct hashMap* mp, char* key) 
+{
+    int bucketIndex = hashFunction(mp, key);
+    struct node* bucketHead = mp->arr[bucketIndex];
+    while (bucketHead != NULL) 
+    {
+        if (strcmp(bucketHead->key, key) == 0) 
+        {
+            return bucketHead->value;
+        }
+        bucketHead = bucketHead->next;
+    }
+    char* errorMssg = (char*)malloc(sizeof(char) * 25);
+    strcpy(errorMssg, "Error 404! No data found.\n");
+    return errorMssg;
+}
+int main()
+{
+    struct hashMap* mp = (struct hashMap*)malloc(sizeof(struct hashMap));
+    initializeHashMap(mp);
+    insert(mp, "Workholic", "Rashi");
+    insert(mp, "mars14", "Varsha");
+    insert(mp, "grand_coder", "Dream");
+    insert(mp, "GFG", "happy");
+    insert(mp, "decentBoy", "Manas");
+    printf("%s\n", search(mp, "grand_coder"));
+    printf("%s\n", search(mp, "Workholic"));
+    printf("%s\n", search(mp, "mars14"));
+    printf("%s\n", search(mp, "decentBoy"));
+    printf("%s\n", search(mp, "GFG"));
+    printf("%s\n", search(mp, "randomKey"));
+    printf("\nAfter deletion : \n");
+    deleteKey(mp, "decentBoy");
+    printf("%s\n", search(mp, "decentBoy"));
+    return 0;
+}
+Output:
+ 
+
+2) Hashing with Linear Probing
+#include <bits/stdc++.h>
+using namespace std;
+template <typename K, typename V>
+class HashNode 
+{
+    public:
+    V value;
+    K key;
+    HashNode(K key, V value)
+    {
+        this->value = value;
+        this->key = key;
+    }
+};
+template <typename K, typename V>
+class HashMap 
+{
+    HashNode<K, V>** arr;
+    int capacity;
+    int size;
+    HashNode<K, V>* dummy;
+    public:
+    HashMap()
+    {
+        capacity = 20;
+        size = 0;
+        arr = new HashNode<K, V>*[capacity];
+        for (int i = 0; i < capacity; i++)
+            arr[i] = NULL;
+        dummy = new HashNode<K, V>(-1, -1);
+    }
+    int hashCode(K key)
+    {
+        return key % capacity;
+    }
+    void insertNode(K key, V value)
+    {
+        HashNode<K, V>* temp = new HashNode<K, V>(key, value);
+        int hashIndex = hashCode(key);
+        while (arr[hashIndex] != NULL && arr[hashIndex]->key != key && arr[hashIndex]->key != -1) 
+        {
+            hashIndex++;
+            hashIndex %= capacity;
+        }
+        if (arr[hashIndex] == NULL || arr[hashIndex]->key == -1)
+            size++;
+        arr[hashIndex] = temp;
+    }
+    V deleteNode(int key)
+    {
+        int hashIndex = hashCode(key);
+        while (arr[hashIndex] != NULL) 
+        {
+            if (arr[hashIndex]->key == key) 
+            {
+                HashNode<K, V>* temp = arr[hashIndex];
+                arr[hashIndex] = dummy;
+                size--;
+                return temp->value;
+            }
+            hashIndex++;
+            hashIndex %= capacity;
+        }
+        return NULL;
+    }
+    V get(int key)
+    {
+        int hashIndex = hashCode(key);
+        int counter = 0;
+        while (arr[hashIndex] != NULL) 
+        {
+            if (counter++ > capacity)
+                return NULL;
+            if (arr[hashIndex]->key == key)
+                return arr[hashIndex]->value;
+            hashIndex++;
+            hashIndex %= capacity;
+        }
+        return NULL;
+    }
+    int sizeofMap()
+    {
+        return size;
+    }
+    bool isEmpty()
+    {
+        return size == 0;
+    }
+    void display()
+    {
+        for (int i = 0; i < capacity; i++) 
+        {
+            if (arr[i] != NULL && arr[i]->key != -1)
+                cout << "key = " << arr[i]->key << " value = " << arr[i]->value << endl;
+        }
+    }
+};
+int main()
+{
+    HashMap<int, int>* h = new HashMap<int, int>;
+    h->insertNode(1, 1);
+    h->insertNode(2, 2);
+    h->insertNode(2, 3);
+    h->display();
+    cout << h->sizeofMap() << endl;
+    cout << h->deleteNode(2) << endl;
+    cout << h->sizeofMap() << endl;
+    cout << h->isEmpty() << endl;
+    cout << h->get(2);
+    return 0;
+}
+Output:
+ 
+
+3) Hashing with double hashing
+#include <iostream>
+#include <vector>
+#include <bitset>
+using namespace std;
+#define MAX_SIZE 10000001ll
+class doubleHash 
+{
+    int TABLE_SIZE, keysPresent, PRIME;
+    vector<int> hashTable;
+    bitset<MAX_SIZE> isPrime;
+    void __setSieve()
+    {
+        isPrime[0] = isPrime[1] = 1;
+        for(long long i = 2; i*i <= MAX_SIZE; i++)
+            if(isPrime[i] == 0)
+        for(long long j = i*i; j <= MAX_SIZE; j += i)
+            isPrime[j] = 1;
+    }
+    int inline hash1(int value)
+    {
+        return value%TABLE_SIZE;
+    }
+    int inline hash2(int value)
+    {
+        return PRIME - (value%PRIME);
+    }
+    bool inline isFull()
+    {
+        return (TABLE_SIZE == keysPresent);
+    }
+    public:
+    doubleHash(int n)
+    {
+        __setSieve();
+        TABLE_SIZE = n;
+        PRIME = TABLE_SIZE - 1;
+        while(isPrime[PRIME] == 1)
+            PRIME--;
+        keysPresent = 0;
+        for(int i = 0; i < TABLE_SIZE; i++)
+            hashTable.push_back(-1);
+    }
+    void __printPrime(long long n)
+    {
+        for(long long i = 0; i <= n; i++)
+            if(isPrime[i] == 0)
+        cout<<i<<", ";
+        cout<<endl;
+    }
+    void insert(int value)
+    {
+        if(value == -1 || value == -2)
+        {
+            cout<<("ERROR : -1 and -2 can't be inserted in the table\n");
+        }
+        if(isFull())
+        {
+            cout<<("ERROR : Hash Table Full\n");
+            return;
+        }
+        int probe = hash1(value), offset = hash2(value);
+        while(hashTable[probe] != -1)
+        {
+            if(-2 == hashTable[probe])
+                break;
+            probe = (probe+offset) % TABLE_SIZE;
+        }
+        hashTable[probe] = value;
+        keysPresent += 1;
+    }
+    void erase(int value)
+    {
+        if(!search(value))
+            return;
+        int probe = hash1(value), offset = hash2(value);
+        while(hashTable[probe] != -1)
+            if(hashTable[probe] == value)
+            {
+                hashTable[probe] = -2;
+                keysPresent--;
+                return;
+            }
+            else
+                probe = (probe + offset) % TABLE_SIZE;
+    }
+    bool search(int value)
+    {
+        int probe = hash1(value), offset = hash2(value), initialPos = probe;
+        bool firstItr = true;
+        while(1)
+        {
+            if(hashTable[probe] == -1)
+                break;
+            else if(hashTable[probe] == value)
+                return true;
+            else if(probe == initialPos && !firstItr)
+                return false;
+            else
+                probe = ((probe + offset) % TABLE_SIZE);
+            firstItr = false;
+        }
+        return false;
+    }
+    void print()
+    {
+        for(int i = 0; i < TABLE_SIZE; i++)
+            cout<<hashTable[i]<<", ";
+        cout<<"\n";
+    }
+};
+int main()
+{
+    doubleHash myHash(13);
+    int insertions[] = {115, 12, 87, 66, 123},
+    n1 = sizeof(insertions)/sizeof(insertions[0]);
+    for(int i = 0; i < n1; i++)
+        myHash.insert(insertions[i]);
+    cout<< "Status of hash table after initial insertions : "; myHash.print();
+    int queries[] = {1, 12, 2, 3, 69, 88, 115},
+    n2 = sizeof(queries)/sizeof(queries[0]);
+    cout<<"\n"<<"Search operation after insertion : \n";
+    for(int i = 0; i < n2; i++)
+        if(myHash.search(queries[i]))
+              cout<<queries[i]<<" present\n";
+    int deletions[] = {123, 87, 66},
+    n3 = sizeof(deletions)/sizeof(deletions[0]);
+    for(int i = 0; i < n3; i++)
+        myHash.erase(deletions[i]);
+    cout<< "Status of hash table after deleting elements : "; myHash.print();
+    return 0;
+}
+Output:
+ 
+
+4) Hashing with quadratic probing
+#include <bits/stdc++.h>
+using namespace std;
+void printArray(int arr[], int n)
+{
+    for (int i = 0; i < n; i++) 
+    {
+        cout << arr[i] << " ";
+    }
+}
+void hashing(int table[], int tsize, int arr[], int N)
+{
+    for (int i = 0; i < N; i++) 
+    {
+        int hv = arr[i] % tsize;
+        if (table[hv] == -1)
+            table[hv] = arr[i];
+        else 
+        {
+            for (int j = 0; j < tsize; j++) 
+            {
+                int t = (hv + j * j) % tsize;
+                if (table[t] == -1) 
+                {
+                    table[t] = arr[i];
+                    break;
+                }
+            }
+        }
+  }
+  printArray(table, N);
+}
+int main()
+{
+    int arr[] = {20,45,503,65,93,72,86,202};
+    int N = 8;
+    int L = 7;
+    int hash_table[8];
+    for (int i = 0; i < L; i++) 
+    {
+        hash_table[i] = -1;
+    }
+    hashing(hash_table, L, arr, N);
+    return 0;
+}
+Output:

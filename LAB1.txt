@@ -1,0 +1,173 @@
+1.	Tower of Hanoi #include <iostream> using namespace std;
+
+void toh(int n, char s, char d, char i){ if(n==1){
+cout<<n<<" "<<"from "<<s<<" "<<"to "<<d<<endl; return;
+}
+toh(n-1, s, i, d);
+cout<<n<<" "<<"from "<<s<<" "<<"to "<<d<<endl; toh(n-1, i, d, s);
+}
+int main(){ toh(3,'A', 'C', 'B');
+return 0;
+}
+
+2.	All Permutations of a string taken from user
+#include <bits/stdc++.h> using namespace std;
+
+void permute(string a, int l, int r){ if (l == r)
+cout<<a<<endl; else{
+for (int i = l; i <= r; i++)
+{
+swap(a[l], a[i]); permute(a, l+1, r); swap(a[l], a[i]);
+}
+}
+}
+int main(){
+string str = "ABC"; int n = str.size(); permute(str, 0, n-1);
+return 0;
+}
+
+3.	Printing all the binary strings of length n
+#include <bits/stdc++.h> using namespace std;
+
+void printTheArray(int arr[], int n){ for (int i = 0; i < n; i++) {
+cout << arr[i] << " ";
+ 
+}
+cout << endl;
+}
+void generateAllBinaryStrings(int n, int arr[], int i){ if (i == n) {
+printTheArray(arr, n); return;
+}
+arr[i] = 0;
+generateAllBinaryStrings(n, arr, i + 1); arr[i] = 1;
+generateAllBinaryStrings(n, arr, i + 1);
+}
+int main(){ int n = 6; int arr[n];
+generateAllBinaryStrings(n, arr, 0);
+return 0;
+}
+
+4.	Calculate Greatest Common Division GCD using Euclid’s algorithm
+#include <iostream> using namespace std;
+
+int gcd(int a, int b) { if (b == 0)
+return a;
+return gcd(b, a % b);
+}
+int main() { int a , b; cin>>a>>b;
+cout<<"GCD of "<< a <<" and "<< b <<" is "<< gcd(a, b); return 0;
+}
+
+5.	Implement merge sort algorithm using recursion
+#include <iostream> using namespace std;
+
+void merge(int array[], int left, int mid, int right){ int array1 = mid - left + 1;
+int array2 = right - mid;
+int *l = new int[array1], *r = new int[array2];
+for (int i = 0; i < array1; i++) l[i] = array[left + i];
+for (int j = 0; j < array2; j++) r[j] = array[mid + 1 + j]; int i = 0, j = 0, k = left;
+while (i < array1 && j < array2){ if (l[i] <= r[j]){
+array[k] = l[i]; i++;
+ 
+}
+else{
+array[k] = r[j]; j++;
+} k++;
+}
+while (i < array1){ array[k] = l[i]; i++;
+k++;
+while (j < array2){ array[k] = r[j]; j++;
+k++;
+}
+delete[] l; delete[] r;
+}
+}
+void mergeSort(int array[], int const begin, int const end){ if (begin >= end) return;
+int mid = begin + (end - begin) / 2; mergeSort(array, begin, mid); mergeSort(array, mid + 1, end); merge(array, begin, mid, end);
+}
+void printArray(int A[], int size){
+for (auto i = 0; i < size; i++) cout << A[i] << " ";
+}
+
+int main(){
+int arr[] = {12, 11, 13, 5, 6, 7};
+auto arr_size = sizeof(arr) / sizeof(arr[0]); mergeSort(arr, 0, arr_size - 1); printArray(arr, arr_size);
+return 0;
+}
+
+6.	Solve the N Queen problem in chess using Recursion
+#include<iostream> using namespace std; #define N 4
+
+void printBoard(int board[N][N]) { for (int i = 0; i < N; i++) {
+for (int j = 0; j < N; j++) cout << board[i][j] << " ";
+cout << endl;
+}
+}
+ 
+bool isValid(int board[N][N], int row, int col) { for (int i = 0; i < col; i++)
+if (board[row][i]) return false;
+for (int i=row, j=col; i>=0 && j>=0; i--, j--) if (board[i][j]) return false;
+for (int i=row, j=col; j>=0 && i<N; i++, j--) if (board[i][j]) return true;
+}
+bool solveNQueen(int board[N][N], int col) { if (col >= N) return true;
+for (int i = 0; i < N; i++) {
+if (isValid(board, i, col) ) { board[i][col] = 1;
+if ( solveNQueen(board, col + 1)) return true; board[i][col] = 0;
+}
+return false;
+}
+bool checkSolution() { int board[N][N]; for(int i = 0; i<N; i++) for(int j = 0; j<N; j++) board[i][j] = 0;
+if ( solveNQueen(board, 0) == false ) { cout << "No Solution";
+return false;
+}
+printBoard(board); return true;
+}
+int main() { checkSolution();
+}
+
+7.	Remove a given element form a linked list using recursion
+#include <bits/stdc++.h> using namespace std;
+
+struct Node { int data;
+struct Node* next;
+};
+Node* deleteNode(Node* start, int k){ if (k < 1) return start;
+if (start == NULL) return NULL; if (k == 1){
+Node *res = start->next; delete(start);
+return res;
+}
+start->next = deleteNode(start->next, k-1);
+ 
+return start;
+}
+void insert(struct Node **head_ref, int new_data) { struct Node *new_node = new Node;
+new_node->data = new_data; new_node->next = *head_ref;
+*head_ref = new_node;
+}
+void printList(struct Node *head){ while (head!=NULL){
+cout << head->data << " "; head = head->next;
+}
+cout<<endl;
+}
+int main(){
+struct Node *head = NULL; insert(&head,1); insert(&head,2); insert(&head,3); insert(&head,4); insert(&head,5); insert(&head,6);
+head = deleteNode(head, 3); printList(head);
+return 0;
+}
+
+8.	Solve egg dropping problem using recursion
+#include <bits/stdc++.h> using namespace std;
+
+int max(int a, int b) { return (a > b) ? a : b; } int egg(int n, int k){
+if (k == 1 || k == 0)return k; if (n == 1) return k;
+int min = INT_MAX, x, res; for (x = 1; x <= k; x++)
+{
+res = max(egg(n - 1, x - 1), egg(n, k - x)); if (res < min)
+min = res;
+}
+return min + 1;
+}
+int main(){
+int n = 2, k = 5;
+cout << "Minimum number of trials" << n << " eggs and " << k << " floors is "<< egg(n, k) << endl; return 0;
+}

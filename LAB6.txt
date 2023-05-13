@@ -1,0 +1,106 @@
+Lab 6: Heaps
+
+1) Last Stone Weight
+class Solution {
+public:
+    int lastStoneWeight(vector<int>& stones) {
+        priority_queue<int> pq(stones.begin(), stones.end());
+        while(pq.size() > 1){
+            int y = pq.top();
+            pq.pop();
+            int x = pq.top();
+            pq.pop();
+            if(x != y){
+                pq.push(y - x);
+            } 
+        }
+
+        if(pq.empty()){
+            return 0;
+        }else{
+            return pq.top();
+        }
+    }
+};
+
+2) Top K Frequent Elements
+class Solution {
+public:
+    vector<int> topKFrequent(vector<int>& nums, int k) 
+    {
+        priority_queue<pair<int, int>, vector<pair<int,int>>, greater<pair<int,int>>> pq;
+        unordered_map<int,int> mp; 
+        for(auto it:nums)
+            mp[it]++; 
+        for(auto it:mp)
+        {
+            pq.push({it.second, it.first});     
+            if(pq.size()>k)
+                pq.pop();
+        }
+         vector<int> ans;
+        while(!pq.empty())
+        {
+            ans.push_back(pq.top().second);
+            pq.pop();
+        }  
+        return ans;     
+    }
+};
+
+4) Haunted
+#include<bits/stdc++.h>
+using namespace std;
+map<int,int> mp;
+int a[100100]={0};
+int main()
+{
+    priority_queue<pair<int,int> >P;
+    int n,i,x,m;
+    int k=0;
+    scanf("%d %d",&n,&m);
+    for(i=0;i<n;i++)
+    {
+        scanf("%d",&x);
+        if(mp.count(x)==0)
+        {
+            mp[x]=k;
+            a[k]++;
+            k++;
+        }
+        else
+        {
+            a[mp[x]]++;
+        }
+        P.push(make_pair(a[mp[x]],x));
+        printf("%d %d\n",P.top().second,P.top().first);
+    }
+    return(0);
+}
+
+6) Jesse and Cookie
+#include<bits/stdc++.h>
+using namespace std;
+int main()
+{
+    #define int long long
+    int n,k;
+    cin>>n>>k;
+    priority_queue<int, std::vector<int>, std::greater<int> > pq;
+    for(int i=0;i<n;i++)
+    {
+        int val;
+        cin>>val;
+        pq.push(val);
+    }
+    int count=0;
+    bool ans=true;
+    while(1)
+    {
+        if(pq.empty())
+        {
+            ans=false;
+            break;
+        }
+        int a1=pq.top();
+        pq.pop();
